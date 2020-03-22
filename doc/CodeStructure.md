@@ -157,6 +157,20 @@ The following CUDA operations are issued for each event from [`SiPixelRawToClust
 | [`pixelgpudetails::fillHitsModuleStart()`](../src/cuda/plugin-SiPixelClusterizer/SiPixelRawToClusterGPUKernel.cu#L355-L524) | find the "location" of the first hit of each module |
 | [memcpy device-to-host 4 B](../src/cuda/plugin-SiPixelClusterizer/SiPixelRawToClusterGPUKernel.cu#L669-L673) | Transfer number of pixel clusters to host |
 
+#### Kernel timings
+
+Times below report minimum, maximum, mean, and standard deviation in microseconds/event. They are measured with one concurrent event (with two threads in practice) on an otherwise empty node, over the 1000 events.
+
+| Kernel | V100 |
+|-----------|------|
+| [`pixelgpudetails::RawToDigi_kernel()`](../src/cuda/plugin-SiPixelClusterizer/SiPixelRawToClusterGPUKernel.cu#L355-L524) | 4.8-8.9 (mean 6.1 stdev 0.5) us |
+| [`gpuCalibPixel::calibDigis()`](../src/cuda/plugin-SiPixelClusterizer/gpuCalibPixel.h#L21-L64) | 3.1-4.6 (mean 3.7 stdev 0.2) us |
+| [`gpuClustering::countModules()`](../src/cuda/plugin-SiPixelClusterizer/gpuClustering.h#L19-L37) | 2.9-4.1 (mean 3.3 stdev 0.2) us |
+| [`gpuClustering::findClus()`](../src/cuda/plugin-SiPixelClusterizer/gpuClustering.h#L39-L302) | 43-490 (mean 82 stdev 34) us |
+| [`gpuClustering::clusterChargeCut()`](../src/cuda/plugin-SiPixelClusterizer/gpuClusterChargeCut.h#L14-L121) | 12-15 (mean 12.4 stdev 0.6 ) us |
+| [`pixelgpudetails::fillHitsModuleStart()`](../src/cuda/plugin-SiPixelClusterizer/SiPixelRawToClusterGPUKernel.cu#L355-L524) | 5.4-6.8 (mean 5.8 stdev 0.3) us |
+
+
 ### RecHits [`SiPixelRecHitCUDA`](../src/cuda/plugin-SiPixelRecHits/SiPixelRecHitCUDA.cc)
 
 This module computes the 3D position estimate for each cluster.
