@@ -274,8 +274,7 @@ Times below report minimum, maximum, mean, and standard deviation in microsecond
 | [`kernelBLFastFit<4>()`](../src/cuda/plugin-PixelTriplets/BrokenLineFitOnGPU.h#L27-L118) | 5.0-8.7 (mean 5.8 stdev 0.4) us |
 | [`kernelBLFit<4>()`](../src/cuda/plugin-PixelTriplets/BrokenLineFitOnGPU.h#L120-L187) | 21-27 (mean 23 stdev 1) us |
 | [`kernel_classifyTracks`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L343-L409) | 3.2-6.3 (mean 3.9 stdev 0.4) us |
-| [`kernel_fastDuplicateRemover`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L153-L191) | 2.2-4.2 (mean 3.5 stdev 0.2) us |
-| [`kernel_fastDuplicateRemover`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L153-L191) | Identify duplicate tracks |
+| [`kernel_fastDuplicateRemover`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L153-L191) | 8.8-33 (mean 21 stdev 4) us |
 | [`kernel_countHitInTracks`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L424-L436) | 2.2-4.2 (mean 3.5 stdev 0.2) us |
 | `cub::DeviceScanInitKernel()` | 1.1-1.7 (mean 1.2 stdev 0.1) us |
 | `cub::DeviceScanKernel()` | 3.8-5.0 (mean 4.2 stdev 0.2) us |
