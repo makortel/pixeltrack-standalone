@@ -262,7 +262,7 @@ Times below report minimum, maximum, mean, and standard deviation in microsecond
 | [`kernel_find_ntuplets`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L266-L293) | 53.6-366 (mean 177 stdev 51) us |
 | [`cudautils::finalizeBulk()`](../src/cuda/CUDACore/HistoContainer.h#L123-L126) | 1.8-2.4 (mean 2.0 stdev 0.1) us |
 | [`kernel_earlyDuplicateRemover()`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L120-L151) | 6.1-27 (mean 15 stdev 3) us |
-| [`kernel_countMultiplicity()`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L307-L323) |  |
+| [`kernel_countMultiplicity()`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L307-L323) | 2-10 (mean 4.5 stdev 1.4) |
 | `cub::DeviceScanInitKernel()` | 0.9-1.7 (mean 1.07 stdev 0.09) us |
 | `cub::DeviceScanKernel()` | 1.6-3.9 (mean 1.7 stdev 0.1) us |
 | [`kernel_fillMultiplicity()`](../src/cuda/plugin-PixelTriplets/CAHitNtupletGeneratorKernelsImpl.h#L325-L341) | 2.3-10 (mean 4.5 stdev 1.2) us |
