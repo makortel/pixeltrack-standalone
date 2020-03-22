@@ -161,6 +161,15 @@ The following CUDA operations are issued for each event from [`SiPixelRawToClust
 
 This module computes the 3D position estimate for each cluster.
 
+The following memory transfers are done once per job on the first event from [`SiPixelRecHitCUDA`](../src/cuda/plugin-SiPixelRecHits/SiPixelRecHitCUDA.cc)
+| Operation | Description |
+|-----------|-------------|
+| [memcpy host-to-device 32 B](../src/cuda/CondFormats/PixelCPEFast.cc#L52-L53) | Transfer [`pixelCPEforGPU::ParamsOnGPU`](../src/cuda/CondFormats/pixelCPEforGPU.h#L54-L74) main `struct` of detector module parameters |
+| [memcpy host-to-device 16 B](../src/cuda/CondFormats/PixelCPEFast.cc#L54-L58) | Transfer [`pixelCPEforGPU::ParamsOnGPU`](../src/cuda/CondFormats/pixelCPEforGPU.h#L54-L74) parameters common to all modules (thickness ,pitch) |
+| [memcpy host-to-device 3.56 kB](../src/cuda/CondFormats/PixelCPEFast.cc#L59-L63) | Transfer [`phase1PixelTopology::AverageGeometry`](../src/cuda/Geometry/phase1PixelTopology.h#L161-L170) parameters of module ladders in barrel, and z positions of first forward disks |
+| [memcpy host-to-device 160 B](../src/cuda/CondFormats/PixelCPEFast.cc#L64-L69) | Transfer [`pixelCPEforGPU::LayerGeometry`](../src/cuda/CondFormats/pixelCPEforGPU.h#L49-L52) layer indices |
+| [memcpy host-to-device 208 kB](../src/cuda/CondFormats/PixelCPEFast.cc#L64-L68) | Transfer [`pixelCPEforGPU::DetParams`](../src/cuda/CondFormats/pixelCPEforGPU.h#L28-L45) detector module parameters |
+
 The following CUDA operations are issued for each event from [`PixelRecHits.cu`](../src/cuda/plugin-SiPixelRecHits/PixelRecHits.cu)
 | Operation | Description |
 |-----------|-------------|
@@ -229,7 +238,7 @@ This module transfers the pixel tracks from the device to the host.
 
 | Operation | Description |
 |-----------|-------------|
-| [memcpy device-to-host X B](../src/cuda/CUDADataFormats/HeterogeneousSoA.h#L42) | Transfer [`pixeltrack::TrackSoA`](../src/cuda/CUDADataFormats/PixelTrackHeterogeneous.h#L13-L55) |
+| [memcpy device-to-host 3.97 MB](../src/cuda/CUDADataFormats/HeterogeneousSoA.h#L42) | Transfer [`pixeltrack::TrackSoA`](../src/cuda/CUDADataFormats/PixelTrackHeterogeneous.h#L13-L55) |
 
 ### Transfer vertices to host ([`PixelVertexSoAFromCUDA`](../src/cuda/plugin-PixelVertexFinding/PixelVertexSoAFromCUDA.cc))
 
@@ -237,4 +246,4 @@ This module transfers the pixel vertices from the device to the host.
 
 | Operation | Description |
 |-----------|-------------|
-| [memcpy device-to-host X B](../src/cuda/CUDADataFormats/HeterogeneousSoA.h#L42) | Transfer [`ZVertexSoA`](../src/cuda/CUDADataFormats/ZVertexSoA.h#L10-L24) |
+| [memcpy device-to-host 117 kB](../src/cuda/CUDADataFormats/HeterogeneousSoA.h#L42) | Transfer [`ZVertexSoA`](../src/cuda/CUDADataFormats/ZVertexSoA.h#L10-L24) |
