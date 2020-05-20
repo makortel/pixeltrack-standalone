@@ -5,4 +5,4 @@ kokkos_cuda::TestProducer2 pluginKokkos.so
 kokkos_serial::TestProducer2 pluginKokkos.so
 kokkos_cuda::TestProducer3 pluginKokkos.so
 kokkos_serial::TestProducer3 pluginKokkos.so
-InitializeScopeGuard pluginKokkosCoreKokkos.so
+InitializeScopeGuard pluginKokkos.so
