@@ -86,8 +86,8 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  // Initialize Kokkos
-  kokkos_common::InitializeScopeGuard kokkosGuard;
+  // Initialize Kokkos, needs to go through a plugin to avoid CUDA device symbol collisions
+  auto kokkosGuard = kokkos_common::PluginFactory::create("InitializeScopeGuard");
 
   // Initialize EventProcessor
   std::vector<std::string> edmodules;
