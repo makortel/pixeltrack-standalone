@@ -104,13 +104,14 @@ KOKKOS_MAKEFILE := $(KOKKOS_BUILD)/Makefile
 KOKKOS_CMAKEFLAGS := -DCMAKE_INSTALL_PREFIX=$(KOKKOS_INSTALL) \
                      -DCMAKE_INSTALL_LIBDIR=lib \
                      -DKokkos_CXX_STANDARD=14 \
-                     -DCMAKE_CXX_COMPILER=$(KOKKOS_SRC)/bin/nvcc_wrapper -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_CONSTEXPR=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=On -DKokkos_CUDA_DIR=$(CUDA_BASE) -DKokkos_ARCH_VOLTA70=On
+                     -DCMAKE_CXX_COMPILER=$(KOKKOS_SRC)/bin/nvcc_wrapper -DKokkos_ENABLE_CUDA=On -DKokkos_ENABLE_CUDA_CONSTEXPR=On -DKokkos_ENABLE_CUDA_LAMBDA=On -DKokkos_CUDA_DIR=$(CUDA_BASE) -DKokkos_ARCH_VOLTA70=On
 # if without CUDA, replace the above line with
 #                     -DCMAKE_CXX_COMPILER=g++
 export KOKKOS_DEPS := $(KOKKOS_LIB)
 export KOKKOS_CXXFLAGS := -I$(KOKKOS_INSTALL)/include
 KOKKOS_CUDA_ARCH := 70
 $(eval $(call CUFLAGS_template,$(KOKKOS_CUDA_ARCH),KOKKOS_))
+KOKKOS_CUDA_CUFLAGS := $(KOKKOS_NVCC_COMMON) $(USER_CUDAFLAGS)
 export KOKKOS_CUFLAGS := $(KOKKOS_CUDA_CUFLAGS) -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored
 export KOKKOS_LDFLAGS := -L$(KOKKOS_INSTALL)/lib -lkokkoscore -ldl
 export KOKKOS_DLINKFLAGS := $(KOKKOS_CUDA_DLINKFLAGS)

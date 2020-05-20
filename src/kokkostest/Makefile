@@ -37,19 +37,22 @@ $(1)_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_SRC:%=%.o))
 $(1)_DEP := $$($(1)_OBJ:$.o=$.d)
 # kokkos code, built only for host
 $(1)_HOST_SRC := $$(wildcard $(TARGET_DIR)/$(1)/kokkoshost/*.cc)
-$(1)_HOST_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_HOST_SRC:%=%.o))
+#$(1)_HOST_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_HOST_SRC:%=%.o))
+$(1)_HOST_OBJ := $$(if $$(strip $$($(1)_HOST_SRC)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_host.o)
 $(1)_HOST_DEP := $$($(1)_HOST_OBJ:$.o=$.d)
 # portable kokkos code
 $(1)_PORTABLE_SRC := $$(wildcard $(TARGET_DIR)/$(1)/kokkos/*.cc)
 # serial backend
-$(1)_SERIAL_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.serial.o))
+#$(1)_SERIAL_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.serial.o))
+$(1)_SERIAL_OBJ := $$(if $$(strip $$($(1)_SERIAL_SRC)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_serial.o)
 $(1)_SERIAL_DEP := $$($(1)_SERIAL_OBJ:$.o=$.d)
 # CUDA backend
-$(1)_CUDA_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.cuda.o))
+#$(1)_CUDA_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.cuda.o))
+$(1)_CUDA_OBJ := $$(if $$(strip $$($(1)_CUDA_SRC)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_cuda.o)
 $(1)_CUDA_DEP := $$($(1)_CUDA_OBJ:$.o=$.d)
 # this means all built kokkos objects...
 $(1)_CUOBJ := $$($(1)_HOST_OBJ) $$($(1)_SERIAL_OBJ) $$($(1)_CUDA_OBJ)
-$(1)_CUDADLINK := $$(if $$(strip $$($(1)_CUOBJ)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_cudalink.o)
+#$(1)_CUDADLINK := $$(if $$(strip $$($(1)_CUOBJ)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_cudalink.o)
 
 ALL_DEPENDS += $$($(1)_DEP) $$($(1)_HOST_DEP) $$($(1)_SERIAL_DEP) $$($(1)_CUDA_DEP)
 $(1)_LIB := $(LIB_DIR)/$(TARGET_NAME)/lib$(1).so
@@ -78,6 +81,7 @@ $(1)_SERIAL_DEP := $$($(1)_SERIAL_OBJ:$.o=$.d)
 $(1)_CUDA_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.cuda.o))
 $(1)_CUDA_DEP := $$($(1)_CUDA_OBJ:$.o=$.d)
 # this means all built kokkos objects...
+$(1)_CU
 $(1)_CUOBJ := $$($(1)_HOST_OBJ) $$($(1)_SERIAL_OBJ) $$($(1)_CUDA_OBJ)
 $(1)_CUDADLINK := $$(if $$(strip $$($(1)_CUOBJ)),$(OBJ_DIR)/$(TARGET_NAME)/plugin-$(1)/plugin$(1)_cudalink.o)
 
