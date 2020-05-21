@@ -24,7 +24,8 @@ EXE_DEP := $(EXE_OBJ:$.o=$.d)
 LIBNAMES := $(filter-out plugin-% bin test Makefile% plugins.txt%,$(wildcard *))
 PLUGINNAMES := $(patsubst plugin-%,%,$(filter plugin-%,$(wildcard *)))
 MY_CXXFLAGS := -I$(TARGET_DIR) -DSRC_DIR=$(TARGET_DIR) -DLIB_DIR=$(LIB_DIR)/$(TARGET_NAME)
-MY_LDFLAGS := -ldl
+MY_LDFLAGS := -ldl -Wl,-rpath,$(LIB_DIR)/$(TARGET_NAME)
+MY_LDFLAGS_NVCC := -rpath,$(LIB_DIR)/$(TARGET_NAME)
 LIB_LDFLAGS := -L$(LIB_DIR)/$(TARGET_NAME)
 
 ALL_DEPENDS := $(EXE_DEP)
@@ -138,7 +139,7 @@ $$($(1)_LIB): $$($(1)_OBJ) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_DEPS)) 
 else
 $$($(1)_LIB): $$($(1)_OBJ) $$($(1)_CUOBJ) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_DEPS)) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LIB))
 	@[ -d $$(@D) ] || mkdir -p $$(@D)
-	$(CUDA_NVCC) $$($(1)_OBJ) $$($(1)_CUOBJ) -shared $(LIB_LDFLAGS) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LDFLAGS)) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_LDFLAGS)) $(LIB_LDFLAGS) -o $$@
+	$(CUDA_NVCC) $$($(1)_OBJ) $$($(1)_CUOBJ) -shared --linker-options '-pthread -E -z defs' $(LIB_LDFLAGS) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LDFLAGS)) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_LDFLAGS)) $(LIB_LDFLAGS) -o $$@
 endif
 
 # Anything depending on Kokkos
@@ -178,7 +179,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.serial: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(CUDA_NVCC) $^ $(MY_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(CUDA_NVCC) $^ --linker-options '$(MY_LDFLAGS_NVCC)' -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 
 # CUDA backend
 $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o: $(SRC_DIR)/$(TARGET_NAME)/test/kokkos/%.cc
@@ -187,4 +188,4 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o: $(SRC_DIR)/$(TARGET_NAME)/tes
 
 $(TEST_DIR)/$(TARGET_NAME)/%.cuda: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o | $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(CUDA_NVCC) $^ $(MY_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(CUDA_NVCC) $^ --linker-options '$(MY_LDFLAGS_NVCC)' -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
