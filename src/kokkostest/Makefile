@@ -25,7 +25,7 @@ LIBNAMES := $(filter-out plugin-% bin test Makefile% plugins.txt%,$(wildcard *))
 PLUGINNAMES := $(patsubst plugin-%,%,$(filter plugin-%,$(wildcard *)))
 MY_CXXFLAGS := -I$(TARGET_DIR) -DSRC_DIR=$(TARGET_DIR) -DLIB_DIR=$(LIB_DIR)/$(TARGET_NAME)
 MY_LDFLAGS := -ldl -Wl,-rpath,$(LIB_DIR)/$(TARGET_NAME)
-MY_LDFLAGS_NVCC := -rpath,$(LIB_DIR)/$(TARGET_NAME)
+MY_LDFLAGS_NVCC := --linker-options '-rpath,$(LIB_DIR)/$(TARGET_NAME)'
 LIB_LDFLAGS := -L$(LIB_DIR)/$(TARGET_NAME)
 
 ALL_DEPENDS := $(EXE_DEP)
@@ -50,7 +50,6 @@ $(1)_CUDA_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.cu
 $(1)_CUDA_DEP := $$($(1)_CUDA_OBJ:$.o=$.d)
 # this means all built kokkos objects...
 $(1)_CUOBJ := $$($(1)_HOST_OBJ) $$($(1)_SERIAL_OBJ) $$($(1)_CUDA_OBJ)
-#$(1)_CUDADLINK := $$(if $$(strip $$($(1)_CUOBJ)),$(OBJ_DIR)/$(TARGET_NAME)/$(1)/lib$(1)_cudalink.o)
 
 ALL_DEPENDS += $$($(1)_DEP) $$($(1)_HOST_DEP) $$($(1)_SERIAL_DEP) $$($(1)_CUDA_DEP)
 $(1)_LIB := $(LIB_DIR)/$(TARGET_NAME)/lib$(1).so
@@ -80,7 +79,6 @@ $(1)_CUDA_OBJ := $$(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$$($(1)_PORTABLE_SRC:%=%.cu
 $(1)_CUDA_DEP := $$($(1)_CUDA_OBJ:$.o=$.d)
 # this means all built kokkos objects...
 $(1)_CUOBJ := $$($(1)_HOST_OBJ) $$($(1)_SERIAL_OBJ) $$($(1)_CUDA_OBJ)
-#$(1)_CUDADLINK := $$(if $$(strip $$($(1)_CUOBJ)),$(OBJ_DIR)/$(TARGET_NAME)/plugin-$(1)/plugin$(1)_cudalink.o)
 
 ALL_DEPENDS += $$($(1)_DEP) $$($(1)_HOST_DEP) $$($(1)_SERIAL_DEP) $$($(1)_CUDA_DEP)
 $(1)_LIB := $(LIB_DIR)/$(TARGET_NAME)/plugin$(1).so
@@ -139,7 +137,7 @@ $$($(1)_LIB): $$($(1)_OBJ) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_DEPS)) 
 else
 $$($(1)_LIB): $$($(1)_OBJ) $$($(1)_CUOBJ) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_DEPS)) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LIB))
 	@[ -d $$(@D) ] || mkdir -p $$(@D)
-	$(CUDA_NVCC) $$($(1)_OBJ) $$($(1)_CUOBJ) -shared --linker-options '-E' --linker-options '-z,defs' $(LIB_LDFLAGS) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LDFLAGS)) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_LDFLAGS)) $(LIB_LDFLAGS) -o $$@
+	$(CUDA_NVCC) $$($(1)_OBJ) $$($(1)_CUOBJ) $(LDFLAGS_NVCC) -shared $(SO_LDFLAGS_NVCC) $(LIB_LDFLAGS) $$(foreach lib,$$($(1)_DEPENDS),$$($$(lib)_LDFLAGS)) $$(foreach dep,$(EXTERNAL_DEPENDS),$$($$(dep)_LDFLAGS)) $(LIB_LDFLAGS) -o $$@
 endif
 
 # Anything depending on Kokkos
@@ -179,7 +177,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.serial: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(CUDA_NVCC) $^ --linker-options '$(MY_LDFLAGS_NVCC)' -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(CUDA_NVCC) $^ $(MY_LDFLAGS_NVCC) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 
 # CUDA backend
 $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o: $(SRC_DIR)/$(TARGET_NAME)/test/kokkos/%.cc
@@ -188,4 +186,4 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o: $(SRC_DIR)/$(TARGET_NAME)/tes
 
 $(TEST_DIR)/$(TARGET_NAME)/%.cuda: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.cuda.o | $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(CUDA_NVCC) $^ --linker-options '$(MY_LDFLAGS_NVCC)' -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(CUDA_NVCC) $^ $(MY_LDFLAGS_NVCC) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
