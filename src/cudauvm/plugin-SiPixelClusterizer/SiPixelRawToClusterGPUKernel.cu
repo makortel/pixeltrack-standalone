@@ -27,6 +27,7 @@
 // CMSSW includes
 #include "CUDADataFormats/gpuClusteringConstants.h"
 #include "CUDACore/cudaCheck.h"
+#include "CUDACore/currentDevice.h"
 #include "CUDACore/device_unique_ptr.h"
 #include "CUDACore/host_unique_ptr.h"
 
@@ -44,9 +45,9 @@ namespace pixelgpudetails {
   // number of words for all the FEDs
   constexpr uint32_t MAX_FED_WORDS = pixelgpudetails::MAX_FED * pixelgpudetails::MAX_WORD;
 
-  SiPixelRawToClusterGPUKernel::WordFedAppender::WordFedAppender() {
-    word_ = cms::cuda::make_host_noncached_unique<unsigned int[]>(MAX_FED_WORDS, cudaHostAllocWriteCombined);
-    fedId_ = cms::cuda::make_host_noncached_unique<unsigned char[]>(MAX_FED_WORDS, cudaHostAllocWriteCombined);
+  SiPixelRawToClusterGPUKernel::WordFedAppender::WordFedAppender(cudaStream_t stream) {
+    word_ = cms::cuda::make_managed_unique<unsigned int[]>(MAX_FED_WORDS, stream);
+    fedId_ = cms::cuda::make_managed_unique<unsigned char[]>(MAX_FED_WORDS, stream);
   }
 
   void SiPixelRawToClusterGPUKernel::WordFedAppender::initializeWordFed(int fedId,
@@ -55,6 +56,22 @@ namespace pixelgpudetails {
                                                                         unsigned int length) {
     std::memcpy(word_.get() + wordCounterGPU, src, sizeof(uint32_t) * length);
     std::memset(fedId_.get() + wordCounterGPU / 2, fedId - 1200, length / 2);
+  }
+
+  void SiPixelRawToClusterGPUKernel::WordFedAppender::memAdvise() {
+#ifndef CUDAUVM_DISABLE_ADVISE
+    auto dev = cms::cuda::currentDevice();
+    cudaCheck(cudaMemAdvise(word_.get(), MAX_FED_WORDS * sizeof(unsigned int), cudaMemAdviseSetReadMostly, dev));
+    cudaCheck(cudaMemAdvise(fedId_.get(), MAX_FED_WORDS * sizeof(unsigned char), cudaMemAdviseSetReadMostly, dev));
+#endif
+  }
+
+  void SiPixelRawToClusterGPUKernel::WordFedAppender::clearAdvise() {
+#ifndef CUDAUVM_DISABLE_ADVISE
+    auto dev = cms::cuda::currentDevice();
+    cudaCheck(cudaMemAdvise(word_.get(), MAX_FED_WORDS * sizeof(unsigned int), cudaMemAdviseUnsetReadMostly, dev));
+    cudaCheck(cudaMemAdvise(fedId_.get(), MAX_FED_WORDS * sizeof(unsigned char), cudaMemAdviseUnsetReadMostly, dev));
+#endif
   }
 
   ////////////////////
@@ -536,6 +553,7 @@ namespace pixelgpudetails {
                                                        bool debug,
                                                        cudaStream_t stream) {
     nDigis = wordCounter;
+    const auto currentDevice = cms::cuda::currentDevice();
 
 #ifdef GPU_DEBUG
     std::cout << "decoding " << wordCounter << " digis. Max is " << pixelgpudetails::MAX_FED_WORDS << std::endl;
@@ -554,23 +572,20 @@ namespace pixelgpudetails {
       const int threadsPerBlock = 512;
       const int blocks = (wordCounter + threadsPerBlock - 1) / threadsPerBlock;  // fill it all
 
-      assert(0 == wordCounter % 2);
       // wordCounter is the total no of words in each event to be trasfered on device
-      auto word_d = cms::cuda::make_device_unique<uint32_t[]>(wordCounter, stream);
-      auto fedId_d = cms::cuda::make_device_unique<uint8_t[]>(wordCounter, stream);
-
-      cudaCheck(
-          cudaMemcpyAsync(word_d.get(), wordFed.word(), wordCounter * sizeof(uint32_t), cudaMemcpyDefault, stream));
-      cudaCheck(cudaMemcpyAsync(
-          fedId_d.get(), wordFed.fedId(), wordCounter * sizeof(uint8_t) / 2, cudaMemcpyDefault, stream));
+      assert(0 == wordCounter % 2);
+#ifndef CUDAUVM_DISABLE_PREFETCH
+      cudaCheck(cudaMemPrefetchAsync(wordFed.word(), wordCounter * sizeof(uint32_t), currentDevice, stream));
+      cudaCheck(cudaMemPrefetchAsync(wordFed.fedId(), wordCounter * sizeof(uint8_t) / 2, currentDevice, stream));
+#endif
 
       // Launch rawToDigi kernel
       RawToDigi_kernel<<<blocks, threadsPerBlock, 0, stream>>>(
           cablingMap,
           modToUnp,
           wordCounter,
-          word_d.get(),
-          fedId_d.get(),
+          wordFed.word(),
+          wordFed.fedId(),
           digis_d.xx(),
           digis_d.yy(),
           digis_d.adc(),

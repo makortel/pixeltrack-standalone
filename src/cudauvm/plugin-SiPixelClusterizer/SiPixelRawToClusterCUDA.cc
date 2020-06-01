@@ -41,8 +41,8 @@ private:
   edm::EDPutTokenT<cms::cuda::Product<SiPixelClustersCUDA>> clusterPutToken_;
 
   pixelgpudetails::SiPixelRawToClusterGPUKernel gpuAlgo_;
-  std::unique_ptr<pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender> wordFedAppender_;
   PixelFormatterErrors errors_;
+  std::unique_ptr<pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender> wordFedAppender_;
 
   const bool includeErrors_;
   const bool useQuality_;
@@ -57,8 +57,6 @@ SiPixelRawToClusterCUDA::SiPixelRawToClusterCUDA(edm::ProductRegistry& reg)
   if (includeErrors_) {
     digiErrorPutToken_ = reg.produces<cms::cuda::Product<SiPixelDigiErrorsCUDA>>();
   }
-
-  wordFedAppender_ = std::make_unique<pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender>();
 }
 
 void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent,
@@ -92,6 +90,7 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent,
 
   // In CPU algorithm this loop is part of PixelDataFormatter::interpretRawData()
   ErrorChecker errorcheck;
+  wordFedAppender_ = std::make_unique<pixelgpudetails::SiPixelRawToClusterGPUKernel::WordFedAppender>(ctx.stream());
   for (int fedId : fedIds_) {
     if (fedId == 40)
       continue;  // skip pilot blade data
@@ -145,6 +144,7 @@ void SiPixelRawToClusterCUDA::acquire(const edm::Event& iEvent,
 
   }  // end of for loop
 
+  wordFedAppender_->memAdvise();
   gpuAlgo_.makeClustersAsync(gpuMap,
                              gpuModulesToUnpack,
                              gpuGains,
@@ -167,6 +167,8 @@ void SiPixelRawToClusterCUDA::produce(edm::Event& iEvent, const edm::EventSetup&
   if (includeErrors_) {
     ctx.emplace(iEvent, digiErrorPutToken_, gpuAlgo_.getErrors());
   }
+  wordFedAppender_->clearAdvise();
+  wordFedAppender_.reset();
 }
 
 // define as framework plugin
