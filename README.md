@@ -140,6 +140,11 @@ To disable `cudaMemPrefetchAsync`, compile with
 make cudauvm ... USER_CXXFLAGS="-DCUDAUVM_DISABLE_PREFETCH"
 ```
 
+To use managed memory also for temporary device-only allocations, compile with
+```
+make cudauvm ... USER_CXXFLAGS="-DCUDAUVM_MANAGED_TEMPORARY"
+```
+
 #### `kokkos` and `kokkostest`
 
 If `nvcc` is not in your `$PATH`, the build recipe is
