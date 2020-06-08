@@ -22,10 +22,10 @@ private:
   edm::EDGetTokenT<cms::cuda::Product<SiPixelDigisCUDA>> digiGetToken_;
   edm::EDPutTokenT<SiPixelDigisSoA> digiPutToken_;
 
-  cms::cuda::host::unique_ptr<uint32_t[]> pdigi_;
-  cms::cuda::host::unique_ptr<uint32_t[]> rawIdArr_;
-  cms::cuda::host::unique_ptr<uint16_t[]> adc_;
-  cms::cuda::host::unique_ptr<int32_t[]> clus_;
+  uint32_t const* pdigi_ = nullptr;
+  uint32_t const* rawIdArr_ = nullptr;
+  uint16_t const* adc_ = nullptr;
+  int32_t const* clus_ = nullptr;
 
   size_t nDigis_;
 };
@@ -43,10 +43,14 @@ void SiPixelDigisSoAFromCUDA::acquire(const edm::Event& iEvent,
   const auto& gpuDigis = ctx.get(iEvent, digiGetToken_);
 
   nDigis_ = gpuDigis.nDigis();
-  pdigi_ = gpuDigis.pdigiToHostAsync(ctx.stream());
-  rawIdArr_ = gpuDigis.rawIdArrToHostAsync(ctx.stream());
-  adc_ = gpuDigis.adcToHostAsync(ctx.stream());
-  clus_ = gpuDigis.clusToHostAsync(ctx.stream());
+  gpuDigis.pdigiPrefetchAsync(cudaCpuDeviceId, ctx.stream());
+  gpuDigis.rawIdArrPrefetchAsync(cudaCpuDeviceId, ctx.stream());
+  gpuDigis.adcPrefetchAsync(cudaCpuDeviceId, ctx.stream());
+  gpuDigis.clusPrefetchAsync(cudaCpuDeviceId, ctx.stream());
+  pdigi_ = gpuDigis.pdigi();
+  rawIdArr_ = gpuDigis.rawIdArr();
+  adc_ = gpuDigis.adc();
+  clus_ = gpuDigis.clus();
 }
 
 void SiPixelDigisSoAFromCUDA::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -60,12 +64,12 @@ void SiPixelDigisSoAFromCUDA::produce(edm::Event& iEvent, const edm::EventSetup&
   //     host memory to be allocated without a CUDA stream
   // - What if a CPU algorithm would produce the same SoA? We can't
   //   use cudaMallocHost without a GPU...
-  iEvent.emplace(digiPutToken_, nDigis_, pdigi_.get(), rawIdArr_.get(), adc_.get(), clus_.get());
+  iEvent.emplace(digiPutToken_, nDigis_, pdigi_, rawIdArr_, adc_, clus_);
 
-  pdigi_.reset();
-  rawIdArr_.reset();
-  adc_.reset();
-  clus_.reset();
+  pdigi_ = nullptr;
+  rawIdArr_ = nullptr;
+  adc_ = nullptr;
+  clus_ = nullptr;
 }
 
 // define as framework plugin
