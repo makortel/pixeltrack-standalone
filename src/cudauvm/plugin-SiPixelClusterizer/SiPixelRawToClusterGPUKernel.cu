@@ -601,10 +601,6 @@ namespace pixelgpudetails {
       cudaDeviceSynchronize();
       cudaCheck(cudaGetLastError());
 #endif
-
-      if (includeErrors) {
-        digiErrors_d.copyErrorToHostAsync(stream);
-      }
     }
     // End of Raw2Digi and passing data for clustering
 
@@ -679,6 +675,11 @@ namespace pixelgpudetails {
 
       // MUST be ONE block
       fillHitsModuleStart<<<1, 1024, 0, stream>>>(clusters_d.c_clusInModule(), clusters_d.clusModuleStart());
+
+      // transfers to host
+      if (includeErrors) {
+        digiErrors_d.prefetchAsync(cudaCpuDeviceId, stream);
+      }
 
       // last element holds the number of all clusters
       cudaCheck(cudaMemcpyAsync(&(nModules_Clusters_h[1]),
