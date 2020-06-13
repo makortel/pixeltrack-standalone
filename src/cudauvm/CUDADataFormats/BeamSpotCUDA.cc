@@ -4,7 +4,7 @@
 #include "CUDACore/managed_unique_ptr.h"
 #include "CUDACore/ScopedSetDevice.h"
 
-BeamSpotCUDA::BeamSpotCUDA(Data const& data_h, int device, cudaStream_t stream): device_(device) {
+BeamSpotCUDA::BeamSpotCUDA(Data const& data_h, int device, cudaStream_t stream) : device_(device) {
   data_d_ = cms::cuda::make_managed_unique<Data>(stream);
   *data_d_ = data_h;
 #ifndef CUDAUVM_DISABLE_ADVISE
