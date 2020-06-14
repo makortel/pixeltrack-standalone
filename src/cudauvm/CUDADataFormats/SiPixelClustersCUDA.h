@@ -1,8 +1,10 @@
 #ifndef CUDADataFormats_SiPixelCluster_interface_SiPixelClustersCUDA_h
 #define CUDADataFormats_SiPixelCluster_interface_SiPixelClustersCUDA_h
 
+#ifndef CUDAUVM_MANAGED_TEMPORARY
 #include "CUDACore/device_unique_ptr.h"
-#include "CUDACore/host_unique_ptr.h"
+#endif
+#include "CUDACore/managed_unique_ptr.h"
 #include "CUDACore/cudaCompat.h"
 
 #include <cuda_runtime.h>
@@ -11,7 +13,7 @@ class SiPixelClustersCUDA {
 public:
   SiPixelClustersCUDA() = default;
   explicit SiPixelClustersCUDA(size_t maxClusters, cudaStream_t stream);
-  ~SiPixelClustersCUDA() = default;
+  ~SiPixelClustersCUDA();
 
   SiPixelClustersCUDA(const SiPixelClustersCUDA &) = delete;
   SiPixelClustersCUDA &operator=(const SiPixelClustersCUDA &) = delete;
@@ -58,16 +60,22 @@ public:
   DeviceConstView *view() const { return view_d.get(); }
 
 private:
-  cms::cuda::device::unique_ptr<uint32_t[]> moduleStart_d;   // index of the first pixel of each module
+  cms::cuda::managed::unique_ptr<uint32_t[]> moduleStart_d;  // index of the first pixel of each module
+  // originally from rechits
+  cms::cuda::managed::unique_ptr<uint32_t[]> clusModuleStart_d;  // index of the first cluster of each module
+#ifdef CUDAUVM_MANAGED_TEMPORARY
+  cms::cuda::managed::unique_ptr<uint32_t[]> clusInModule_d;  // number of clusters found in each module
+  cms::cuda::managed::unique_ptr<uint32_t[]> moduleId_d;      // module id of each module
+
+#else
   cms::cuda::device::unique_ptr<uint32_t[]> clusInModule_d;  // number of clusters found in each module
   cms::cuda::device::unique_ptr<uint32_t[]> moduleId_d;      // module id of each module
+#endif
 
-  // originally from rechits
-  cms::cuda::device::unique_ptr<uint32_t[]> clusModuleStart_d;  // index of the first cluster of each module
-
-  cms::cuda::device::unique_ptr<DeviceConstView> view_d;  // "me" pointer
+  cms::cuda::managed::unique_ptr<DeviceConstView> view_d;  // "me" pointer
 
   uint32_t nClusters_h;
+  int device_;
 };
 
 #endif
