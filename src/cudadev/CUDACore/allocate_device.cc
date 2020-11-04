@@ -6,30 +6,21 @@
 
 #include "getCachingDeviceAllocator.h"
 
-namespace {
-  const size_t maxAllocationSize =
-      notcub::CachingDeviceAllocator::IntPow(cms::cuda::allocator::binGrowth, cms::cuda::allocator::maxBin);
-}
-
 namespace cms::cuda {
   void *allocate_device(int dev, size_t nbytes, cudaStream_t stream) {
-    void *ptr = nullptr;
     if constexpr (allocator::useCaching) {
-      if (nbytes > maxAllocationSize) {
-        throw std::runtime_error("Tried to allocate " + std::to_string(nbytes) +
-                                 " bytes, but the allocator maximum is " + std::to_string(maxAllocationSize));
-      }
-      cudaCheck(allocator::getCachingDeviceAllocator().DeviceAllocate(dev, &ptr, nbytes, stream));
+      return allocator::getCachingDeviceAllocator().allocate(dev, nbytes, stream);
     } else {
+      void *ptr = nullptr;
       ScopedSetDevice setDeviceForThisScope(dev);
       cudaCheck(cudaMalloc(&ptr, nbytes));
+      return ptr;
     }
-    return ptr;
   }
 
   void free_device(int device, void *ptr) {
     if constexpr (allocator::useCaching) {
-      cudaCheck(allocator::getCachingDeviceAllocator().DeviceFree(device, ptr));
+      allocator::getCachingDeviceAllocator().free(device, ptr);
     } else {
       ScopedSetDevice setDeviceForThisScope(device);
       cudaCheck(cudaFree(ptr));

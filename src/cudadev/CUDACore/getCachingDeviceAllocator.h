@@ -2,8 +2,11 @@
 #define HeterogeneousCore_CUDACore_src_getCachingDeviceAllocator
 
 #include "CUDACore/cudaCheck.h"
+#include "CUDACore/currentDevice.h";
 #include "CUDACore/deviceCount.h"
-#include "CachingDeviceAllocator.h"
+#include "CUDACore/eventWorkHasCompleted.h"
+#include "CUDACore/GenericCachingAllocator.h"
+#include "CUDACore/ScopedSetDevice.h"
 
 namespace cms::cuda::allocator {
   // Use caching or not
@@ -38,14 +41,66 @@ namespace cms::cuda::allocator {
     return ret;
   }
 
-  inline notcub::CachingDeviceAllocator& getCachingDeviceAllocator() {
+  struct DeviceTraits {
+    using DeviceType = int;
+    using QueueType = cudaStream_t;
+    using EventType = cudaEvent_t;
+
+    static constexpr DeviceType kInvalidDevice = -1;
+
+    static DeviceType currentDevice() { return cms::cuda::currentDevice(); }
+
+    static cms::cuda::ScopedSetDevice setDevice(DeviceType device) { return cms::cuda::ScopedSetDevice(device); }
+
+    static bool canReuseInDevice(DeviceType a, DeviceType b) { return a == b; }
+
+    static bool canReuseInQueue(QueueType a, QueueType b) { return a == b; }
+
+    static bool eventWorkHasCompleted(EventType e) { return cms::cuda::eventWorkHasCompleted(e); }
+
+    static EventType createEvent() {
+      EventType e;
+      cudaCheck(cudaEventCreateWithFlags(&e, cudaEventDisableTiming));
+      return e;
+    }
+
+    static void destroyEvent(EventType e) { cudaCheck(cudaEventDestroy(e)); }
+
+    static EventType recreateEvent(EventType e, DeviceType prev, DeviceType next) {
+      throw std::runtime_error("CUDADeviceTraits::recreateEvent() should never be called");
+    }
+
+    static void recordEvent(EventType e, QueueType queue) { cudaCheck(cudaEventRecord(e, queue)); }
+
+    static std::ostream& printDevice(std::ostream& os, DeviceType device) {
+      os << "Device " << device;
+      return os;
+    }
+
+    static void* allocate(size_t bytes) {
+      void* ptr;
+      cudaCheck(cudaMalloc(&ptr, bytes));
+      return ptr;
+    }
+
+    static void* tryAllocate(size_t bytes) {
+      void* ptr;
+      auto error = cudaMalloc(&ptr, bytes);
+      if (error == cudaErrorMemoryAllocation) {
+        return nullptr;
+      }
+      cudaCheck(error);
+      return ptr;
+    }
+
+    static void free(void* ptr) { cudaCheck(cudaFree(ptr)); }
+  };
+
+  using CachingDeviceAllocator = GenericCachingAllocator<DeviceTraits>;
+
+  inline CachingDeviceAllocator& getCachingDeviceAllocator() {
     // the public interface is thread safe
-    static notcub::CachingDeviceAllocator allocator{binGrowth,
-                                                    minBin,
-                                                    maxBin,
-                                                    minCachedBytes(),
-                                                    false,  // do not skip cleanup
-                                                    debug};
+    static CachingDeviceAllocator allocator{binGrowth, minBin, maxBin, minCachedBytes(), debug};
     return allocator;
   }
 }  // namespace cms::cuda::allocator
