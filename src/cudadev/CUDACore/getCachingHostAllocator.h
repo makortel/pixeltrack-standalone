@@ -18,7 +18,7 @@ namespace cms::cuda::allocator {
                 << "  max bin    " << maxBin << "\n"
                 << "  resulting bins:\n";
       for (auto bin = minBin; bin <= maxBin; ++bin) {
-        auto binSize = notcub::CachingDeviceAllocator::IntPow(binGrowth, bin);
+        auto binSize = ::allocator::intPow(binGrowth, bin);
         if (binSize >= (1 << 30) and binSize % (1 << 30) == 0) {
           std::cout << "    " << std::setw(8) << (binSize >> 30) << " GB\n";
         } else if (binSize >= (1 << 20) and binSize % (1 << 20) == 0) {
