@@ -26,6 +26,11 @@ namespace cms::cuda {
     }
   }  // namespace impl
 
+  Context::Context(int device, SharedStreamPtr stream):
+    currentDevice_(device), stream_(std::move(stream)) {
+    cudaCheck(cudaSetDevice(currentDevice_));
+  }
+
   void *Context::allocate_device_impl(size_t bytes) {
     if constexpr (allocator::useCaching) {
       return allocator::getCachingDeviceAllocator().allocate(device(), bytes, stream());

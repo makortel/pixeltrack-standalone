@@ -43,6 +43,9 @@ namespace cms {
         return std::unique_ptr<void, impl::HostDeleter>(allocate_host_impl(bytes), impl::HostDeleter());
       }
 
+    protected:
+      explicit Context(int device, SharedStreamPtr stream);
+
     private:
       void* allocate_device_impl(size_t bytes);
       void* allocate_host_impl(size_t bytes);
