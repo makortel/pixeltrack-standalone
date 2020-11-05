@@ -6,26 +6,13 @@
 
 #include "CUDACore/allocate_device.h"
 #include "CUDACore/currentDevice.h"
+#include "CUDACore/Context.h"
 
 namespace cms {
   namespace cuda {
     namespace device {
       namespace impl {
-        // Additional layer of types to distinguish from host::unique_ptr
-        class DeviceDeleter {
-        public:
-          DeviceDeleter() = default;  // for edm::Wrapper
-          DeviceDeleter(int device) : device_{device} {}
-
-          void operator()(void *ptr) {
-            if (device_ >= 0) {
-              free_device(device_, ptr);
-            }
-          }
-
-        private:
-          int device_ = -1;
-        };
+        using DeviceDeleter = cms::cuda::impl::DeviceDeleter;
       }  // namespace impl
 
       template <typename T>
