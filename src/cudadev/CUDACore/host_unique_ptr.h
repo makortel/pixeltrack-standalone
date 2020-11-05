@@ -71,6 +71,43 @@ namespace cms {
 
     template <typename T, typename... Args>
     typename host::impl::make_host_unique_selector<T>::bounded_array make_host_unique_uninitialized(Args &&...) = delete;
+
+    // With Context
+    template <typename T>
+    typename host::impl::make_host_unique_selector<T>::non_array make_host_unique(Context &ctx) {
+      static_assert(std::is_trivially_constructible<T>::value,
+                    "Allocating with non-trivial constructor on the pinned host memory is not supported");
+      auto mem = ctx.allocate_host(sizeof(T));
+      return typename host::impl::make_host_unique_selector<T>::non_array{reinterpret_cast<T *>(mem.release()),
+                                                                          mem.get_deleter()};
+    }
+
+    template <typename T>
+    typename host::impl::make_host_unique_selector<T>::unbounded_array make_host_unique(size_t n, Context &ctx) {
+      using element_type = typename std::remove_extent<T>::type;
+      static_assert(std::is_trivially_constructible<element_type>::value,
+                    "Allocating with non-trivial constructor on the pinned host memory is not supported");
+      auto mem = ctx.allocate_host(n * sizeof(element_type));
+      return typename host::impl::make_host_unique_selector<T>::unbounded_array{
+          reinterpret_cast<element_type *>(mem.release()), mem.get_deleter()};
+    }
+
+    // No check for the trivial constructor, make it clear in the interface
+    template <typename T>
+    typename host::impl::make_host_unique_selector<T>::non_array make_host_unique_uninitialized(Context &ctx) {
+      auto mem = ctx.allocate_host(sizeof(T));
+      return typename host::impl::make_host_unique_selector<T>::non_array{reinterpret_cast<T *>(mem.release()),
+                                                                          mem.get_deleter()};
+    }
+
+    template <typename T>
+    typename host::impl::make_host_unique_selector<T>::unbounded_array make_host_unique_uninitialized(size_t n,
+                                                                                                      Context &ctx) {
+      using element_type = typename std::remove_extent<T>::type;
+      auto mem = ctx.allocate_host(n * sizeof(element_type));
+      return typename host::impl::make_host_unique_selector<T>::unbounded_array{
+          reinterpret_cast<element_type *>(mem.release(), mem.get())};
+    }
   }  // namespace cuda
 }  // namespace cms
 
