@@ -2,7 +2,7 @@
 #define HeterogeneousCore_CUDACore_src_getCachingDeviceAllocator
 
 #include "CUDACore/cudaCheck.h"
-#include "CUDACore/currentDevice.h";
+#include "CUDACore/currentDevice.h"
 #include "CUDACore/deviceCount.h"
 #include "CUDACore/eventWorkHasCompleted.h"
 #include "CUDACore/GenericCachingAllocator.h"
