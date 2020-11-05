@@ -5,16 +5,13 @@
 #include <functional>
 
 #include "CUDACore/allocate_host.h"
+#include "CUDACore/Context.h"
 
 namespace cms {
   namespace cuda {
     namespace host {
       namespace impl {
-        // Additional layer of types to distinguish from host::unique_ptr
-        class HostDeleter {
-        public:
-          void operator()(void *ptr) { cms::cuda::free_host(ptr); }
-        };
+        using HostDeleter = cms::cuda::impl::HostDeleter;
       }  // namespace impl
 
       template <typename T>
