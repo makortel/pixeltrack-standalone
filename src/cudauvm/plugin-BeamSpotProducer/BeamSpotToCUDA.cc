@@ -39,18 +39,22 @@ BeamSpotToCUDA::BeamSpotToCUDA(edm::ProductRegistry& reg)
 
 void BeamSpotToCUDA::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 #ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
-  *bsHost = iSetup.get<BeamSpotCUDA::Data>();
+  *bsHost = iSetup.get<BeamSpotPOD>();
 #else
-  auto const& bs = iSetup.get<BeamSpotCUDA::Data>();
+  auto const& bs = iSetup.get<BeamSpotPOD>();
 #endif
 
   cms::cuda::ScopedContextProduce ctx{iEvent.streamID()};
 
+  BeamSpotCUDA bsDevice(ctx.stream());
 #ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
-  ctx.emplace(iEvent, bsPutToken_, bsHost.get(), ctx.stream());
+  cms::cuda::copyAsync(bsDevice.ptr(), bsHost, ctx.stream());
 #else
-  ctx.emplace(iEvent, bsPutToken_, bs, ctx.device(), ctx.stream());
-#endif
+  *(bsDevice.data()) = bs;
+  bsDevice.memAdviseAndPrefetch(ctx.device(), ctx.stream());
+#endif  // CUDAUVM_DISABLE_MANAGED_BEAMSPOT
+
+  ctx.emplace(iEvent, bsPutToken_, std::move(bsDevice));
 }
 
 DEFINE_FWK_MODULE(BeamSpotToCUDA);
