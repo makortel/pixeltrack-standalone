@@ -1,17 +1,19 @@
+#include <fstream>
+
+#include <cuda_runtime.h>
+
 #include "CUDACore/Product.h"
+#include "CUDACore/ScopedContext.h"
+#include "CUDACore/copyAsync.h"
+#ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
+#include "CUDACore/host_noncached_unique_ptr.h"
+#endif
 #include "CUDADataFormats/BeamSpotCUDA.h"
+#include "DataFormats/BeamSpotPOD.h"
 #include "Framework/EventSetup.h"
 #include "Framework/Event.h"
 #include "Framework/PluginFactory.h"
 #include "Framework/EDProducer.h"
-#include "CUDACore/ScopedContext.h"
-#ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
-#include "CUDACore/host_noncached_unique_ptr.h"
-#endif
-
-#include <cuda_runtime.h>
-
-#include <fstream>
 
 class BeamSpotToCUDA : public edm::EDProducer {
 public:
@@ -24,7 +26,7 @@ private:
   edm::EDPutTokenT<cms::cuda::Product<BeamSpotCUDA>> bsPutToken_;
 
 #ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
-  cms::cuda::host::noncached::unique_ptr<BeamSpotCUDA::Data> bsHost;
+  cms::cuda::host::noncached::unique_ptr<BeamSpotPOD> bsHost;
 #endif
 };
 
@@ -32,7 +34,7 @@ BeamSpotToCUDA::BeamSpotToCUDA(edm::ProductRegistry& reg)
     : bsPutToken_(reg.produces<cms::cuda::Product<BeamSpotCUDA>>())
 #ifdef CUDAUVM_DISABLE_MANAGED_BEAMSPOT
       ,
-      bsHost(cms::cuda::make_host_noncached_unique<BeamSpotCUDA::Data>(cudaHostAllocWriteCombined))
+      bsHost(cms::cuda::make_host_noncached_unique<BeamSpotPOD>(cudaHostAllocWriteCombined))
 #endif
 {
 }

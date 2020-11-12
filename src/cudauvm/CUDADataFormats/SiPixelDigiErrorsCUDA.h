@@ -40,7 +40,7 @@ private:
 #ifdef CUDAUVM_DISABLE_MANAGED_CLUSTERING
   cms::cuda::device::unique_ptr<PixelErrorCompact[]> data_d;
   cms::cuda::device::unique_ptr<cms::cuda::SimpleVector<PixelErrorCompact>> error_d;
-  cms::cuda::host::unique_ptr<cms : cuda::SimpleVector<PixelErrorCompact>> error_h;
+  cms::cuda::host::unique_ptr<cms::cuda::SimpleVector<PixelErrorCompact>> error_h;
 #else
   cms::cuda::managed::unique_ptr<PixelErrorCompact[]> data_d;
   cms::cuda::managed::unique_ptr<cms::cuda::SimpleVector<PixelErrorCompact>> error_d;
