@@ -43,6 +43,7 @@ namespace cms {
     private:
       friend class impl::ScopedContextGetterBase;
       friend class ScopedContextProduce;
+      friend class impl::ContextBase;
       friend class edm::Wrapper<Product<T>>;
 
       explicit Product(int device, SharedStreamPtr stream, SharedEventPtr event, T data)
