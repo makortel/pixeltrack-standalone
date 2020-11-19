@@ -2,6 +2,7 @@
 #define CUDACore_Context_h
 
 #include <memory>
+#include <tuple>
 
 #include "CUDACore/SharedStreamPtr.h"
 
@@ -44,7 +45,7 @@ namespace cms {
       }
 
     protected:
-      explicit Context(int device, SharedStreamPtr stream);
+      explicit Context(std::tuple<SharedStreamPtr, int> streamDevice);
 
     private:
       void* allocate_device_impl(size_t bytes);

@@ -26,8 +26,8 @@ namespace cms::cuda {
     }
   }  // namespace impl
 
-  Context::Context(int device, SharedStreamPtr stream):
-    currentDevice_(device), stream_(std::move(stream)) {
+  Context::Context(std::tuple<SharedStreamPtr,int> streamDevice):
+    currentDevice_(std::get<int>(streamDevice)), stream_(std::move(std::get<SharedStreamPtr>(stream))) {
     cudaCheck(cudaSetDevice(currentDevice_));
   }
 
