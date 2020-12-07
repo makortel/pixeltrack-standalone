@@ -58,7 +58,10 @@ ifeq ($(wildcard $(ROCM_BASE)),)
 # ROCm platform not found
 ROCM_BASE :=
 else
+# ROCm platform at $(ROCM_BASE)
 export ROCM_HIPCC := $(ROCM_BASE)/bin/hipcc
+export ROCM_DEPS := $(ROCM_BASE)/lib/
+export HIPCC_FLAGS := -fno-gpu-rdc --amdgpu-target=gfx900
 endif
 
 # Input data definitions
@@ -237,11 +240,13 @@ all: $(TARGETS)
 TEST_TARGETS := $(patsubsts %,test_%,$(TARGETS))
 TEST_CPU_TARGETS := $(patsubst %,test_%_cpu,$(TARGETS))
 TEST_NVIDIAGPU_TARGETS := $(patsubst %,test_%_nvidiagpu,$(TARGETS))
+TEST_AMDGPU_TARGETS := $(patsubst %,test_%_amdgpu,$(TARGETS))
 TEST_INTELGPU_TARGETS := $(patsubst %,test_%_intelgpu,$(TARGETS))
 TEST_AUTO_TARGETS := $(patsubst %,test_%_auto,$(TARGETS))
-test: test_cpu test_nvidiagpu test_intelgpu test_auto
+test: test_cpu test_nvidiagpu test_amdgpu test_intelgpu test_auto
 test_cpu: $(TEST_CPU_TARGETS)
 test_nvidiagpu: $(TEST_NVIDIAGPU_TARGETS)
+test_amdgpu := $(TEST_AMDGPU_TARGETS)
 test_intelgpu: $(TEST_INTELGPU_TARGETS)
 test_auto: $(TEST_AUTO_TARGETS)
 # $(TARGETS) needs to be PHONY because only the called Makefile knows their dependencies
@@ -249,6 +254,7 @@ test_auto: $(TEST_AUTO_TARGETS)
 .PHONY: test $(TEST_TARGETS)
 .PHONY: test_cpu $(TEST_CPU_TARGETS)
 .PHONY: test_nvidiagpu $(TEST_NVIDIAGPU_TARGETS)
+.PHONY: test_amdgpu $(TEST_AMDGPU_TARGETS)
 .PHONY: test_intelgpu $(TEST_INTELGPU_TARGETS)
 .PHONY: test_auto $(TEST_AUTO_TARGETS)
 .PHONY: format $(patsubst %,format_%,$(TARGETS_ALL))
@@ -311,6 +317,12 @@ test_$(1)_nvidiagpu: $(1)
 	@echo
 	@echo "Testing $(1) for NVIDIA GPU device"
 	+$(MAKE) -C src/$(1) test_nvidiagpu
+	@echo
+
+test_$(1)_amdgpu: $(1)
+	@echo
+	@echo "Testing $(1) for AMD GPU device"
+	+$(MAKE) -C src/$(1) test_amdgpu
 	@echo
 
 test_$(1)_intelgpu: $(1)
