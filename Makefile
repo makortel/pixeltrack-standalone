@@ -26,6 +26,7 @@ export LIB_DIR := $(BASE_DIR)/lib
 export TEST_DIR := $(BASE_DIR)/test
 
 # System external definitions
+# CUDA
 CUDA_BASE := /usr/local/cuda-11.0
 ifeq ($(wildcard $(CUDA_BASE)),)
 # CUDA platform not found
@@ -49,6 +50,15 @@ endef
 $(eval $(call CUFLAGS_template,$(CUDA_ARCH),))
 export CUDA_CUFLAGS
 export CUDA_DLINKFLAGS
+endif
+
+# ROCm
+ROCM_BASE := /usr/local/rocm-3.10
+ifeq ($(wildcard $(ROCM_BASE)),)
+# ROCm platform not found
+ROCM_BASE :=
+else
+export ROCM_HIPCC := $ROCM_BASE/bin/hipcc
 endif
 
 # Input data definitions
@@ -115,7 +125,6 @@ KOKKOS_MAKEFILE := $(KOKKOS_BUILD)/Makefile
 export KOKKOS_HOST_PARALLEL :=
 export KOKKOS_DEVICE_PARALLEL := CUDA
 KOKKOS_CUDA_ARCH := 70
-KOKKOS_CMAKE_CUDA_ARCH := 70
 ifeq ($(KOKKOS_CUDA_ARCH),50)
   KOKKOS_CMAKE_CUDA_ARCH := -DKokkos_ARCH_MAXWELL50=On
 else ifeq ($(KOKKOS_CUDA_ARCH),70)
@@ -124,6 +133,14 @@ else ifeq ($(KOKKOS_CUDA_ARCH),75)
   KOKKOS_CMAKE_CUDA_ARCH := -DKokkos_ARCH_TURING75=On
 else
   $(error Unsupported KOKKOS_CUDA_ARCH $(KOKKOS_CUDA_ARCH). Likely it is sufficient just add another case in the Makefile)
+endif
+KOKKOS_HIP_ARCH := VEGA900
+ifeq ($(KOKKOS_HIP_ARCH),VEGA900)
+  KOKKOS_CMAKE_HIP_ARCH := -DKokkos_ARCH_VEGA900=On
+else ifeq ($(KOKKOS_HIP_ARCH),VEGA909)
+  KOKKOS_CMAKE_HIP_ARCH := -DKokkos_ARCH_VEGA909=On
+else
+  $(error Unsupported KOKKOS_HIP_ARCH $(KOKKOS_HIP_ARCH). Likely it is sufficient just add another case in the Makefile)
 endif
 export KOKKOS_DEPS := $(KOKKOS_LIB)
 export KOKKOS_CXXFLAGS := -I$(KOKKOS_INSTALL)/include
@@ -150,6 +167,9 @@ else
     export KOKKOS_DEVICE_SO_LDFLAGS := $(SO_LDFLAGS_NVCC)
     export KOKKOS_DEVICE_CXXFLAGS := $(KOKKOS_NVCC_COMMON) $(CUDA_CXXFLAGS) $(USER_CUDAFLAGS)
     export KOKKOS_DEVICE_TEST_CXXFLAGS := $(CUDA_TEST_CXXFLAGS)
+  else ifeq ($(KOKKOS_DEVICE_PARALLEL),HIP)
+    KOKKOS_CMAKEFLAGS += += -DCMAKE_CXX_COMPILER=$(ROCM_BASE_HIPCC) -DKokkos_ENABLE_HIP=On -DKokkos_HIP_DIR=$(HIP_BASE) $(KOKKOS_CMAKE_HIP_ARCH)
+    export KOKKOS_DEVICE_CXX := $(ROCM_HIPCC)
   else
     $(error Unsupported KOKKOS_DEVICE_PARALLEL $(KOKKOS_DEVICE_PARALLEL))
   endif
