@@ -15,9 +15,14 @@ test_nvidiagpu: $(TARGET)
 	@echo "Testing $(TARGET)"
 	$(TARGET) --maxEvents 2 --cuda
 	@echo "Succeeded"
-test_intelagpu:
+test_amdgpu: $(TARGET)
+	@echo
+	@echo "Testing $(TARGET)"
+	$(TARGET) --maxEvents 2 --hip
+	@echo "Succeeded"
+test_intelgpu:
 test_auto:
-.PHONY: test_cpu test_nvidiagpu test_intelgpu test_auto
+.PHONY: test_cpu test_nvidiagpu test_amdgpu test_intelgpu test_auto
 
 EXE_SRC := $(wildcard $(TARGET_DIR)/bin/*.cc)
 EXE_OBJ := $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(EXE_SRC:%=%.o))
@@ -132,7 +137,7 @@ TESTS_PARALLEL_DEP := $(TESTS_PARALLEL_OBJ:$.o=$.d)
 TESTS_PARALLEL_EXE := $(patsubst $(SRC_DIR)/$(TARGET_NAME)/test/kokkos/%.cc,$(TEST_DIR)/$(TARGET_NAME)/%.parallel,$(TESTS_PORTABLE_SRC))
 # device parallel backend
 TESTS_DEVICE_OBJ := $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(TESTS_PORTABLE_SRC:%=%.device.o))
-TESTS_DEVICE_DEP := $(TESTS_CUDA_OBJ:$.o=$.d)
+TESTS_DEVICE_DEP := $(TESTS_DEVICE_OBJ:$.o=$.d)
 TESTS_DEVICE_EXE := $(patsubst $(SRC_DIR)/$(TARGET_NAME)/test/kokkos/%.cc,$(TEST_DIR)/$(TARGET_NAME)/%.device,$(TESTS_PORTABLE_SRC))
 #
 TESTS_EXE := $(TESTS_SERIAL_EXE)
@@ -166,6 +171,9 @@ $(foreach test,$(TESTS_PARALLEL_EXE),$(eval $(call RUNTEST_template,$(test),cpu)
 endif
 ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
 $(foreach test,$(TESTS_DEVICE_EXE),$(eval $(call RUNTEST_template,$(test),nvidiagpu)))
+endif
+ifeq ($(KOKKOS_DEVICE_PARALLEL),HIP)
+$(foreach test,$(TESTS_DEVICE_EXE),$(eval $(call RUNTEST_template,$(test),amdgpu)))
 endif
 
 -include $(ALL_DEPENDS)
