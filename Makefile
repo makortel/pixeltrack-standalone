@@ -59,9 +59,12 @@ ifeq ($(wildcard $(ROCM_BASE)),)
 ROCM_BASE :=
 else
 # ROCm platform at $(ROCM_BASE)
+#USER_HIPFLAGS :=
+export HIP_DEPS := $(ROCM_BASE)/lib/libamdhip64.so
+#export HIP_CXXFLAGS := -I$(ROCM_BASE)/include
 export ROCM_HIPCC := $(ROCM_BASE)/bin/hipcc
-export ROCM_DEPS := $(ROCM_BASE)/lib/
-export HIPCC_FLAGS := -fno-gpu-rdc --amdgpu-target=gfx900
+HIPCC_UNSUPPORTED_CXXFLAGS := --param vect-max-version-for-alias-checks=50 -Werror=format-contains-nul -Wno-non-template-friend -Werror=return-local-addr -Werror=unused-but-set-variable 
+export HIPCC_FLAGS := -fno-gpu-rdc --amdgpu-target=gfx900 $(filter-out $(HIPCC_UNSUPPORTED_CXXFLAGS),$(CXXFLAGS))
 endif
 
 # Input data definitions
@@ -173,6 +176,7 @@ else
   else ifeq ($(KOKKOS_DEVICE_PARALLEL),HIP)
     KOKKOS_CMAKEFLAGS += -DCMAKE_CXX_COMPILER=$(ROCM_HIPCC) -DKokkos_ENABLE_HIP=On $(KOKKOS_CMAKE_HIP_ARCH)
     export KOKKOS_DEVICE_CXX := $(ROCM_HIPCC)
+    export KOKKOS_DEVICE_CXXFLAGS := $(HIPCC_FLAGS)
   else
     $(error Unsupported KOKKOS_DEVICE_PARALLEL $(KOKKOS_DEVICE_PARALLEL))
   endif

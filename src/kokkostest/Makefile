@@ -32,14 +32,11 @@ LIBNAMES := $(filter-out plugin-% bin test Makefile% plugins.txt%,$(wildcard *))
 PLUGINNAMES := $(patsubst plugin-%,%,$(filter plugin-%,$(wildcard *)))
 MY_CXXFLAGS := -I$(TARGET_DIR) -DSRC_DIR=$(TARGET_DIR) -DLIB_DIR=$(LIB_DIR)/$(TARGET_NAME)
 MY_LDFLAGS := -ldl -Wl,-rpath,$(LIB_DIR)/$(TARGET_NAME)
-ifndef KOKKOS_DEVICE_PARALLEL
 MY_DEVICE_CXXFLAGS := $(MY_CXXFLAGS)
 MY_DEVICE_LDFLAGS := $(MY_LDFLAGS)
-else
 ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
-MY_DEVICE_CXXFLAGS := $(MY_CXXFLAGS) -x cu
+MY_DEVICE_CXXFLAGS += -x cu
 MY_DEVICE_LDFLAGS := --linker-options '-rpath,$(LIB_DIR)/$(TARGET_NAME)'
-endif
 endif
 LIB_LDFLAGS := -L$(LIB_DIR)/$(TARGET_NAME)
 

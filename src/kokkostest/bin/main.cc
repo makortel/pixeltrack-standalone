@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     addModules("kokkos_serial::", Backend::SERIAL);
     addModules("kokkos_pthread::", Backend::PTHREAD);
     addModules("kokkos_cuda::", Backend::CUDA);
-    ddModules("kokkos_hip::", Backend::HIP);
+    addModules("kokkos_hip::", Backend::HIP);
     esmodules = {"IntESProducer"};
     if (transfer) {
       // add modules for transfer
