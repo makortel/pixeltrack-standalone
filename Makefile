@@ -148,7 +148,6 @@ else ifeq ($(KOKKOS_HIP_ARCH),VEGA909)
 else
   $(error Unsupported KOKKOS_HIP_ARCH $(KOKKOS_HIP_ARCH). Likely it is sufficient just add another case in the Makefile)
 endif
-export KOKKOS_DEPS := $(KOKKOS_LIB)
 export KOKKOS_CXXFLAGS := -I$(KOKKOS_INSTALL)/include
 $(eval $(call CUFLAGS_template,$(KOKKOS_CUDA_ARCH),KOKKOS_))
 export KOKKOS_LDFLAGS := -L$(KOKKOS_INSTALL)/lib -lkokkoscore -ldl
@@ -174,7 +173,8 @@ else
     export KOKKOS_DEVICE_CXXFLAGS := $(KOKKOS_NVCC_COMMON) $(CUDA_CXXFLAGS) $(USER_CUDAFLAGS)
     export KOKKOS_DEVICE_TEST_CXXFLAGS := $(CUDA_TEST_CXXFLAGS)
   else ifeq ($(KOKKOS_DEVICE_PARALLEL),HIP)
-    KOKKOS_CMAKEFLAGS += -DCMAKE_CXX_COMPILER=$(ROCM_HIPCC) -DKokkos_ENABLE_HIP=On $(KOKKOS_CMAKE_HIP_ARCH)
+    KOKKOS_CMAKEFLAGS += -DCMAKE_CXX_COMPILER=$(ROCM_HIPCC) -DKokkos_ENABLE_HIP=On $(KOKKOS_CMAKE_HIP_ARCH) -DBUILD_SHARED_LIBS=On
+    export KOKKOS_LIB := $(KOKKOS_LIBDIR)/libkokkoscore.so
     export KOKKOS_DEVICE_CXX := $(ROCM_HIPCC)
     export KOKKOS_DEVICE_LDFLAGS := $(LDFLAGS)
     export KOKKOS_DEVICE_SO_LDFLAGS := $(SO_LDFLAGS)
@@ -191,6 +191,7 @@ ifdef KOKKOS_HOST_PARALLEL
     $(error Unsupported KOKKOS_HOST_PARALLEL $(KOKKOS_HOST_PARALLEL))
   endif
 endif
+export KOKKOS_DEPS := $(KOKKOS_LIB)
 
 # Intel oneAPI
 ONEAPI_BASE := /opt/intel/oneapi
