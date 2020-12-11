@@ -248,7 +248,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.serial: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 
 # Host parallel backend
 ifdef KOKKOS_HOST_PARALLEL
@@ -258,7 +258,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.parallel.o: $(SRC_DIR)/$(TARGET_NAME)
 
 $(TEST_DIR)/$(TARGET_NAME)/%.parallel: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.parallel.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 endif
 
 # Device parallel backend
@@ -269,5 +269,5 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.device.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.device: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.device.o | $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 endif
