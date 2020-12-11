@@ -81,9 +81,9 @@ void testMultiply() {
   std::cout << "TEST MULTIPLY" << std::endl;
   std::cout << "Product of type " << row1 << "x" << col1 << " * " << row2 << "x" << col2 << std::endl;
 
-  Kokkos::View<Matrix<double, row1, col1>, KokkosExecSpace> d_j("d_j");
-  Kokkos::View<Matrix<double, row2, col2>, KokkosExecSpace> d_c("d_c");
-  Kokkos::View<Matrix<double, row1, col2>, KokkosExecSpace> d_multiply_result("d_multiply_result");
+  Kokkos::View<Matrix<double, row1, col1>, KokkosExecSpace> d_j(Kokkos::ViewAllocateWithoutInitializing("d_j"));
+  Kokkos::View<Matrix<double, row2, col2>, KokkosExecSpace> d_c(Kokkos::ViewAllocateWithoutInitializing("d_c"));
+  Kokkos::View<Matrix<double, row1, col2>, KokkosExecSpace> d_multiply_result(Kokkos::ViewAllocateWithoutInitializing("d_multiply_result"));
 
   auto h_j = Kokkos::create_mirror_view(d_j);
   auto h_c = Kokkos::create_mirror_view(d_c);
@@ -120,8 +120,8 @@ void testMultiply() {
 void testInverse3x3() {
   std::cout << "TEST INVERSE 3x3" << std::endl;
 
-  Kokkos::View<Matrix3d, KokkosExecSpace> d_m("d_m");
-  Kokkos::View<Matrix3d, KokkosExecSpace> d_mret("d_mret");
+  Kokkos::View<Matrix3d, KokkosExecSpace> d_m(Kokkos::ViewAllocateWithoutInitializing("d_m"));
+  Kokkos::View<Matrix3d, KokkosExecSpace> d_mret(Kokkos::ViewAllocateWithoutInitializing("d_mret"));
 
   auto h_m = Kokkos::create_mirror_view(d_m);
   auto h_mret = Kokkos::create_mirror_view(d_mret);
@@ -152,8 +152,8 @@ void testInverse3x3() {
 void testInverse4x4() {
   std::cout << "TEST INVERSE 4x4" << std::endl;
 
-  Kokkos::View<Matrix4d, KokkosExecSpace> d_m("d_m");
-  Kokkos::View<Matrix4d, KokkosExecSpace> d_mret("d_mret");
+  Kokkos::View<Matrix4d, KokkosExecSpace> d_m(Kokkos::ViewAllocateWithoutInitializing("d_m"));
+  Kokkos::View<Matrix4d, KokkosExecSpace> d_mret(Kokkos::ViewAllocateWithoutInitializing("d_mret"));
 
   auto h_m = Kokkos::create_mirror_view(d_m);
   auto h_mret = Kokkos::create_mirror_view(d_mret);
@@ -183,8 +183,8 @@ void testInverse4x4() {
 void testInverse5x5() {
   std::cout << "TEST INVERSE 5x5" << std::endl;
 
-  Kokkos::View<Matrix5d, KokkosExecSpace> d_m("d_m");
-  Kokkos::View<Matrix5d, KokkosExecSpace> d_mret("d_mret");
+  Kokkos::View<Matrix5d, KokkosExecSpace> d_m(Kokkos::ViewAllocateWithoutInitializing("d_m"));
+  Kokkos::View<Matrix5d, KokkosExecSpace> d_mret(Kokkos::ViewAllocateWithoutInitializing("d_mret"));
 
   auto h_m = Kokkos::create_mirror_view(d_m);
   auto h_mret = Kokkos::create_mirror_view(d_mret);
@@ -214,8 +214,8 @@ void testInverse5x5() {
 void testEigenvalues() {
   std::cout << "TEST EIGENVALUES" << std::endl;
 
-  Kokkos::View<Matrix3d, KokkosExecSpace> d_m("d_m");
-  Kokkos::View<Eigen::SelfAdjointEigenSolver<Matrix3d>::RealVectorType, KokkosExecSpace> d_ret("d_ret");
+  Kokkos::View<Matrix3d, KokkosExecSpace> d_m(Kokkos::ViewAllocateWithoutInitializing("d_m"));
+  Kokkos::View<Eigen::SelfAdjointEigenSolver<Matrix3d>::RealVectorType, KokkosExecSpace> d_ret(Kokkos::ViewAllocateWithoutInitializing("d_ret"));
 
   auto h_m = Kokkos::create_mirror_view(d_m);
   auto h_ret = Kokkos::create_mirror_view(d_ret);
