@@ -29,17 +29,17 @@ EXE_OBJ := $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(EXE_SRC:%=%.o))
 EXE_DEP := $(EXE_OBJ:$.o=$.d)
 
 LIBNAMES := $(filter-out plugin-% bin test Makefile% plugins.txt%,$(wildcard *))
+ifneq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
+LIBNAMES := $(filter-out CUDACore,$(LIBNAMES))
+endif
 PLUGINNAMES := $(patsubst plugin-%,%,$(filter plugin-%,$(wildcard *)))
 MY_CXXFLAGS := -I$(TARGET_DIR) -DSRC_DIR=$(TARGET_DIR) -DLIB_DIR=$(LIB_DIR)/$(TARGET_NAME)
 MY_LDFLAGS := -ldl -Wl,-rpath,$(LIB_DIR)/$(TARGET_NAME)
-ifndef KOKKOS_DEVICE_PARALLEL
 MY_DEVICE_CXXFLAGS := $(MY_CXXFLAGS)
 MY_DEVICE_LDFLAGS := $(MY_LDFLAGS)
-else
 ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
-MY_DEVICE_CXXFLAGS := $(MY_CXXFLAGS) -x cu
+MY_DEVICE_CXXFLAGS += -x cu
 MY_DEVICE_LDFLAGS := --linker-options '-rpath,$(LIB_DIR)/$(TARGET_NAME)'
-endif
 endif
 LIB_LDFLAGS := -L$(LIB_DIR)/$(TARGET_NAME)
 
@@ -250,7 +250,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.serial: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.serial.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 
 # Host parallel backend
 ifdef KOKKOS_HOST_PARALLEL
@@ -260,7 +260,7 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.parallel.o: $(SRC_DIR)/$(TARGET_NAME)
 
 $(TEST_DIR)/$(TARGET_NAME)/%.parallel: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.parallel.o| $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 endif
 
 # Device parallel backend
@@ -271,5 +271,5 @@ $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.device.o: $(SRC_DIR)/$(TARGET_NAME)/t
 
 $(TEST_DIR)/$(TARGET_NAME)/%.device: $(OBJ_DIR)/$(TARGET_NAME)/test/kokkos/%.cc.device.o | $(LIBS)
 	@[ -d $(@D) ] || mkdir -p $(@D)
-	$(KOKKOS_DEVICE_CXX) $^ $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
+	$(KOKKOS_DEVICE_CXX) $^ $(KOKKOS_DEVICE_LDFLAGS) $(MY_DEVICE_LDFLAGS) -o $@ -L$(LIB_DIR)/$(TARGET_NAME) $(patsubst %,-l%,$(LIBNAMES)) $(foreach dep,$(EXTERNAL_DEPENDS),$($(dep)_LDFLAGS))
 endif
