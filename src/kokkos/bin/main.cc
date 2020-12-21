@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
   int numberOfInnerThreads = 1;
   int maxEvents = -1;
   std::filesystem::path datadir;
-  bool transfer = false;
-  bool validation = false;
-  bool histogram = false;
+  [[maybe_unused]] bool transfer = false;
+  [[maybe_unused]] bool validation = false;
+  [[maybe_unused]] bool histogram = false;
   for (auto i = args.begin() + 1, e = args.end(); i != e; ++i) {
     if (*i == "-h" or *i == "--help") {
       print_help(args.front());
@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
       if (std::find(backends.begin(), backends.end(), backend) != backends.end()) {
         edmodules.emplace_back(prefix + "BeamSpotToKokkos");
         edmodules.emplace_back(prefix + "SiPixelRawToCluster");
+        /*
         edmodules.emplace_back(prefix + "SiPixelRecHitKokkos");
         edmodules.emplace_back(prefix + "CAHitNtupletKokkos");
         edmodules.emplace_back(prefix + "PixelVertexProducerKokkos");
@@ -157,6 +158,7 @@ int main(int argc, char** argv) {
         if (histogram) {
           edmodules.emplace_back(prefix + "HistoValidator");
         }
+        */
 
         esmodules.emplace_back(prefix + "SiPixelFedCablingMapESProducer");
         esmodules.emplace_back(prefix + "SiPixelGainCalibrationForHLTESProducer");

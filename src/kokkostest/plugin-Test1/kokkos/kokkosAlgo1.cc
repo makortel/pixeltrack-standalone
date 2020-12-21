@@ -30,8 +30,22 @@ namespace KOKKOS_NAMESPACE {
 
     Kokkos::View<float*, KokkosExecSpace> d_c{"d_c", NUM_VALUES};
     Kokkos::parallel_for(
-        hintLightWeight(Kokkos::RangePolicy<KokkosExecSpace>(execSpace, 0, NUM_VALUES)),
-        KOKKOS_LAMBDA(const size_t i) { d_c[i] = d_a[i] + d_b[i]; });
+        hintLightWeight(Kokkos::RangePolicy<KokkosExecSpace>(execSpace, 0, 10)),
+        KOKKOS_LAMBDA(const size_t i) {
+          //printf("%lu\n", i);
+          //d_a[i] = 0;
+          //d_a(i) = 0;
+          d_a.data()[i] = i*6;
+          //d_c[i] = d_a[i] + d_b[i];
+        });
+
+    Kokkos::deep_copy(execSpace, h_a, d_a);
+    Kokkos::fence();
+    for (int i=0; i<10; ++i) {
+      std::cout << "i " << i << " " << h_a[i] << std::endl;
+    }
+
+    return d_a;
 
     Kokkos::View<float**, KokkosExecSpace> d_ma{"d_ma", NUM_VALUES, NUM_VALUES};
     Kokkos::View<float**, KokkosExecSpace> d_mb{"d_mb", NUM_VALUES, NUM_VALUES};
