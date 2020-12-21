@@ -9,6 +9,7 @@
 
 #include "CondFormats/pixelCPEforGPU.h"
 #include "KokkosCore/kokkosConfig.h"
+#include "KokkosCore/kokkos_assert.h"
 
 #include "../CAConstants.h"
 #include "CAHitNtupletGeneratorKernels.h"
