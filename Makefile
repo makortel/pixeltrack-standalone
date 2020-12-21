@@ -450,8 +450,7 @@ external_kokkos: $(KOKKOS_LIB)
 
 # release-candidate-3.3.0
 $(KOKKOS_SRC):
-	git clone https://github.com/kokkos/kokkos.git $@
-	cd $@ && git checkout -b release-candidate-3.3.0 46d6b807
+	git clone -b 3.3.00 https://github.com/kokkos/kokkos.git $@
 
 $(KOKKOS_BUILD):
 	mkdir -p $@
