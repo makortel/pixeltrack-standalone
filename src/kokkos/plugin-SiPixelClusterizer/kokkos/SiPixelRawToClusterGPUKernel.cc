@@ -366,11 +366,6 @@ namespace KOKKOS_NAMESPACE {
                                           const bool includeErrors,
                                           const bool debug,
                                           const size_t gIndex) {
-      //printf("%lu %p %lu\n", gIndex, xx.data(), xx.size());
-      //printf("modToUnp %d\n", xx(0));
-      xx.data()[0] = 0;
-      //xx[0] = 0;
-      return;
       xx[gIndex] = 0;
       yy[gIndex] = 0;
       adc[gIndex] = 0;
@@ -388,14 +383,10 @@ namespace KOKKOS_NAMESPACE {
         // 0 is an indicator of a noise/dead channel, skip these pixels during clusterization
         return;
       }
-      // crashes
-      //return;
 
       uint32_t link = getLink(ww);  // Extract link
       uint32_t roc = getRoc(ww);    // Extract Roc in link
       ::pixelgpudetails::DetIdGPU detId = getRawId(cablingMap.data(), fedId, link, roc);
-      // crash
-      //return;
 
       uint8_t errorType = checkROC(ww, fedId, link, cablingMap.data(), debug);
       skipROC = (roc < ::pixelgpudetails::maxROCIndex) ? false : (errorType != 0);
@@ -418,8 +409,6 @@ namespace KOKKOS_NAMESPACE {
       skipROC = modToUnp[index];
       if (skipROC)
         return;
-      // crashes
-      //return;
 
       uint32_t layer = 0;                   //, ladder =0;
       int side = 0, panel = 0, module = 0;  //disk = 0, blade = 0
@@ -610,15 +599,13 @@ namespace KOKKOS_NAMESPACE {
 
         {
           // need Kokkos::Views as local variables to pass to the lambda
-          //auto xx_d = digis_d.xx();
-          Kokkos::View<uint16_t*, KokkosExecSpace> xx_d(Kokkos::ViewAllocateWithoutInitializing("xx_d"), 300000);
+          auto xx_d = digis_d.xx();
           auto yy_d = digis_d.yy();
           auto adc_d = digis_d.adc();
           auto pdigi_d = digis_d.pdigi();
           auto rawIdArr_d = digis_d.rawIdArr();
           auto moduleInd_d = digis_d.moduleInd();
           auto error_d = digiErrors_d.error();  // returns nullptr if default-constructed
-          std::cerr << "size " << xx_d.size() << " " << xx_d.data() << std::endl;
 
           Kokkos::parallel_for(
               "RawToDigi_kernel",
@@ -642,7 +629,6 @@ namespace KOKKOS_NAMESPACE {
                                  i);
               });
         }
-        return;
 #ifdef TODO
         if (includeErrors) {
           digiErrors_d.copyErrorToHostAsync(stream);
