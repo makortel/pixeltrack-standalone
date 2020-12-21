@@ -1,13 +1,13 @@
 #ifndef RecoLocalTracker_SiPixelRecHits_pixelCPEforGPU_h
 #define RecoLocalTracker_SiPixelRecHits_pixelCPEforGPU_h
 
-#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <iterator>
 
 #include <Kokkos_Core.hpp>
 
+#include "KokkosCore/kokkos_assert.h"
 #include "KokkosDataFormats/gpuClusteringConstants.h"
 #include "DataFormats/SOARotation.h"
 #include "Geometry/phase1PixelTopology.h"
