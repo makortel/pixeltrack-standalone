@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "CondFormats/pixelCPEforGPU.h"
+#include "KokkosCore/kokkos_assert.h"
 #include "KokkosDataFormats/approx_atan2.h"
 #include "KokkosDataFormats/BeamSpotKokkos.h"
 #include "KokkosDataFormats/TrackingRecHit2DKokkos.h"
