@@ -2,6 +2,7 @@
 #define CondFormats_SiPixelObjects_SiPixelGainForHLTonGPU_h
 
 #include <Kokkos_Core.hpp>
+#include "KokkosCore/kokkos_assert.h"
 
 struct SiPixelGainForHLTonGPU_DecodingStructure {
   uint8_t gain;
