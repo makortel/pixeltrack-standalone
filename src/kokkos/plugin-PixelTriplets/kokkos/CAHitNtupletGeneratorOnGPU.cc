@@ -107,6 +107,7 @@ namespace KOKKOS_NAMESPACE {
 
     kernels.buildDoublets(hits_d, execSpace);
     kernels.launchKernels(hits_d, tracks, execSpace);
+    return tracks;
     kernels.fillHitDetIndices(hits_d.view(), tracks, execSpace);  // in principle needed only if Hits not "available"
 
     HelixFitOnGPU fitter(bfield, m_params.fit5as4_);

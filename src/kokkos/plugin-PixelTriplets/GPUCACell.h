@@ -302,9 +302,14 @@ public:
     // than a threshold
 
     tmpNtuplet.push_back_unsafe(theDoubletId);
-    assert(tmpNtuplet.size() <= 4);
+    //printf("size %d\n", 1);
+    printf("size %d\n", tmpNtuplet.size());
+    //assert(tmpNtuplet.size() <= 4);
+    //printf("size %d\n", tmpNtuplet.size());
 
     bool last = true;
+    /*
+    if (tmpNtuplet.size() == 0 && false) {
     for (int j = 0; j < outerNeighbors().size(); ++j) {
       auto otherCell = outerNeighbors()[j];
       if (cells[otherCell].theDoubletId < 0)
@@ -313,8 +318,16 @@ public:
       cells[otherCell].find_ntuplets(
           hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
     }
+    }
+    */
+    tmpNtuplet.pop_back();
+    return;
+    //last = false;
     if (last) {  // if long enough save...
+      //printf("size %d\n", tmpNtuplet.size());
+      /*
       if ((unsigned int)(tmpNtuplet.size()) >= minHitsPerNtuplet - 1) {
+        printf("foo\n");
 #ifdef ONLY_TRIPLETS_IN_HOLE
         // triplets accepted only pointing to the hole
         if (tmpNtuplet.size() >= 3 || (startAt0 && hole4(hh, cells[tmpNtuplet[0]])) ||
@@ -335,9 +348,10 @@ public:
           }
         }
       }
+      */
     }
     tmpNtuplet.pop_back();
-    assert(tmpNtuplet.size() < 4);
+    //assert(tmpNtuplet.size() < 4);
   }
 
 private:

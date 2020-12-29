@@ -294,7 +294,7 @@ namespace KOKKOS_NAMESPACE {
       stack.reset();
       thisCell.find_ntuplets(
           hh, cells.data(), cellTracks(), *foundNtuplets, apc(), quality, stack, minHitsPerNtuplet, pid < 3);
-      assert(stack.empty());
+      //assert(stack.empty());
       // printf("in %d found quadruplets: %d\n", cellIndex, apc->get());
     }
   }

@@ -126,6 +126,8 @@ namespace KOKKOS_NAMESPACE {
             }
           });
     }
+    Kokkos::fence();
+    return;
 
     if (m_params.doStats_)
       Kokkos::parallel_for(
