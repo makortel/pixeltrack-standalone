@@ -27,7 +27,7 @@ tracking application. The version here corresponds to
 
 The application is designed to require minimal dependencies on the system. All programs require
 * GNU Make, `curl`, `md5sum`, `tar`
-* C++17 capable compiler. Ffor programs using CUDA that must work with `nvcc`, in the current setup this means GCC 8 or 9, possibly 10 with CUDA 11.1
+* C++17 capable compiler. For programs using CUDA that must work with `nvcc`, in the current setup this means GCC 8 or 9, possibly 10 with CUDA 11.1
   * testing is currently done with GCC 8
 
 In addition, the individual programs assume the following be found from the system
@@ -215,9 +215,7 @@ $ make clean external_kokkos_clean
 $ make kokkos ...
 ```
 * Note that if `CUDA_BASE` needs to be set, it needs to be set for both `make` commands.
-* The target CUDA architecture needs to be set explicitly with `KOKKOS_CUDA_ARCH`
-  * Default value is `70` (7.0) for Volta
-  * Other accepted values are `50` (Maxwell) and`75` (Turing), the list can be extended as neeeded
+* The target CUDA architecture needs to be set explicitly with `KOKKOS_CUDA_ARCH` (see table below)
 * The CMake executable can be set with `CMAKE` in case the default one is too old.
 * The backends to be used in the Kokkos runtime library build are set with `KOKKOS_HOST_PARALLEL` and `KOKKOS_DEVICE_PARALLEL` (see table below)
    * The Serial backend is always enabled
@@ -230,17 +228,18 @@ $ make kokkos ...
 * Support for HIP backend is still work in progress
   * `kokkostest` runs
   * `kokkos` fails at run time inside the CA pattern recognition
-  * Target HIP (ROCm) architecture needs to be set explicitly with `KOKKOS_HIP_ARCH`
+  * Target AMD GPU architecture needs to be set explicitly with `KOKKOS_HIP_ARCH` (see table below)
     * Default value is `VEGA900`
     * Other accepted values are `VEGA909` (althought at this time only `-amdgpu-target=gfx900` is given to `hipcc`)
 
-| Make variable            | Description                                                                                                                                   |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `CUDA_BASE`              | Path to CUDA installation                                                                                                                     |
-| `CMAKE`                  | Path to CMake executable (by default assume `cmake` is found in `$PATH`))                                                                     |
-| `KOKKOS_CUDA_ARCH`       | Target CUDA architecture for Kokkos build, currently needs to be exact. (default: `70`, possible values: `50`, `70`, `75`; trivial to extend) |
-| `KOKKOS_HOST_PARALLEL`   | Host-parallel backend (default empty, possible values: empty, `PTHREAD`)                                                                      |
-| `KOKKOS_DEVICE_PARALLEL` | Device-parallel backend (default `CUDA`, possible values: empty, `CUDA`, `HIP`)                                                               |
+| Make variable            | Description                                                                                                                                                                 |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `CUDA_BASE`              | Path to CUDA installation                                                                                                                                                   |
+| `CMAKE`                  | Path to CMake executable (by default assume `cmake` is found in `$PATH`))                                                                                                   |
+| `KOKKOS_HOST_PARALLEL`   | Host-parallel backend (default empty, possible values: empty, `PTHREAD`)                                                                                                    |
+| `KOKKOS_DEVICE_PARALLEL` | Device-parallel backend (default `CUDA`, possible values: empty, `CUDA`, `HIP`)                                                                                             |
+| `KOKKOS_CUDA_ARCH`       | Target CUDA architecture for Kokkos build (default: `70`, possible values: `50`, `70`, `75`; trivial to extend). Relevant only if `KOKKOS_DEVICE_PARALLEL=CUDA`.            |
+| `KOKKOS_HIP_ARCH`        | Target AMD GPU architecture for Kokkos build (default: `VEGA900`, possible values: `VEGA900`, `VEGA909`; trivial to extend). Relevant only if `KOKKOS_DEVICE_PARALLEL=HIP`. |
 
 ## Code structure
 
