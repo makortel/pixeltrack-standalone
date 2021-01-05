@@ -227,10 +227,8 @@ $ make kokkos ...
 * Use of multiple threads (`--numberOfThreads`) has not been tested and likely does not work correctly. Concurrent events (`--numberOfStreams`) works.
 * Support for HIP backend is still work in progress
   * `kokkostest` runs
-  * `kokkos` fails at run time inside the CA pattern recognition
+  * `kokkos` fails at run time inside the "Pixel tracking"
   * Target AMD GPU architecture needs to be set explicitly with `KOKKOS_HIP_ARCH` (see table below)
-    * Default value is `VEGA900`
-    * Other accepted values are `VEGA909` (althought at this time only `-amdgpu-target=gfx900` is given to `hipcc`)
 
 | Make variable            | Description                                                                                                                                                                 |
 |--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
