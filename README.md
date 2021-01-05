@@ -232,11 +232,12 @@ $ make kokkos ...
 
 | Make variable            | Description                                                                                                                                                                 |
 |--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `CUDA_BASE`              | Path to CUDA installation                                                                                                                                                   |
 | `CMAKE`                  | Path to CMake executable (by default assume `cmake` is found in `$PATH`))                                                                                                   |
 | `KOKKOS_HOST_PARALLEL`   | Host-parallel backend (default empty, possible values: empty, `PTHREAD`)                                                                                                    |
 | `KOKKOS_DEVICE_PARALLEL` | Device-parallel backend (default `CUDA`, possible values: empty, `CUDA`, `HIP`)                                                                                             |
+| `CUDA_BASE`              | Path to CUDA installation. Relevant only if `KOKKOS_DEVICE_PARALLEL=CUDA`.                                                                                                  |
 | `KOKKOS_CUDA_ARCH`       | Target CUDA architecture for Kokkos build (default: `70`, possible values: `50`, `70`, `75`; trivial to extend). Relevant only if `KOKKOS_DEVICE_PARALLEL=CUDA`.            |
+| `ROCM_BASE`              | Path to ROCm installation. Relevant only if `KOKKOS_DEVICE_PARALLEL=HIP`.                                                                                                   |
 | `KOKKOS_HIP_ARCH`        | Target AMD GPU architecture for Kokkos build (default: `VEGA900`, possible values: `VEGA900`, `VEGA909`; trivial to extend). Relevant only if `KOKKOS_DEVICE_PARALLEL=HIP`. |
 
 ## Code structure
