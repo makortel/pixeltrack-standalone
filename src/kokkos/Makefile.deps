@@ -11,3 +11,7 @@ PixelVertexFinding_DEPENDS := Framework KokkosCore KokkosDataFormats DataFormats
 SiPixelClusterizer_DEPENDS := Framework KokkosCore KokkosDataFormats DataFormats CondFormats
 SiPixelRecHits_DEPENDS := Framework KokkosCore KokkosDataFormats DataFormats CondFormats
 Validation_DEPENDS := Framework KokkosCore KokkosDataFormats DataFormats
+ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
+  BeamSpotProducer_DEPENDS += CUDACore
+  KokkosCore_DEPENDS += CUDACore
+endif
