@@ -18,4 +18,5 @@ ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
   PixelVertexFinding_DEPENDS += CUDACore
   SiPixelClusterizer_DEPENDS += CUDACore
   SiPixelRecHits_DEPENDS += CUDACore
+  Validation_DEPENDS += CUDACore
 endif
