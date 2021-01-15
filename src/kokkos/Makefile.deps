@@ -15,4 +15,5 @@ ifeq ($(KOKKOS_DEVICE_PARALLEL),CUDA)
   BeamSpotProducer_DEPENDS += CUDACore
   KokkosCore_DEPENDS += CUDACore
   SiPixelClusterizer_DEPENDS += CUDACore
+  SiPixelRecHits_DEPENDS += CUDACore
 endif
